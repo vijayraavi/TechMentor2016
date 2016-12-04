@@ -19,7 +19,7 @@ Start-Process -FilePath Explorer '\\s1\C$\Windows\System32\configuration'
 Remove-DscConfigurationDocument -CimSession s1 -Stage Current # Current Pending Previos
 
 #############################################################################################
-
+LCM
 
 # Configuring the LCM
 Get-Command -Noun DSC* # Could use Get-Help
@@ -30,22 +30,22 @@ Get-DscLocalConfigurationManager -CimSession s1
 #        - RebootNodeIfNeeded - REfreshMode
 
 # Let's change the LCM to AutoCorrect
-ise .\1a.LCM_Settings_Simple.ps1 # Show this one - don't run
+ise .\2a.LCM_Settings_Simple.ps1 # Show this one - don't run
 
-ise .\1b.LCM_Settings_Param.ps1 # Run this one
+ise .\2b.LCM_Settings_Param.ps1 # Run this one
  
 # Wanna see the MOF? - nah -- who cares
 ise .\s1.meta.mof 
 
 # Set the LCM on two remote targets
-Set-DSCLocalConfigurationManager -ComputerName S1,s2 -Path .\ –Verbose
+Set-DSCLocalConfigurationManager -ComputerName S1 -Path .\ –Verbose
 
 # Let's see if it worked!
 Get-DscLocalConfigurationManager -CimSession s1
 
 # So, let write a DSC config - installing software (Backup)
 Get-WindowsFeature -ComputerName s1 -Name *Backup*
-ISE .\2.Config-Install-Backup.ps1
+ISE .\2c.Config-Install-Backup.ps1
 
 # Deploy the config
 Start-DscConfiguration -ComputerName s1 -Path .\ -Verbose -Wait
@@ -76,7 +76,7 @@ Restart-Computer -ComputerName s1 -Wait -Force
 Get-WindowsFeature -ComputerName s1 -name *backup*
 
 # The CORRECT way is to change the config
-ISE .\3.Config-Remove-Backup.ps1
+ISE .\3d.Config-Remove-Backup.ps1
 
 ######################################################################
 
@@ -87,7 +87,13 @@ Get-DscResource
 Get-DscResource -Name WindowsProcess | Select-Object -ExpandProperty properties
 Get-DscResource -name WindowsProcess -Syntax # Show in ISE
 
+Find-Module -Name *Directory*
+Install-module -Name xActiveDirectory
 
+# To deploy -- copy to special place or
+Invoke-command -ComputerName s1 {Install-module xActiveDirectory -Force}
 
 #######################################################################
+
+#Advanced configs
 

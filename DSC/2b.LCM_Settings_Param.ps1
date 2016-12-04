@@ -16,7 +16,7 @@ Configuration LCM {
 }
 
 # Create the Computer.Meta.Mof in folder
-LCM -computername s1, s2 -OutputPath .\ # <---- Using parameter in command
+LCM -computername s1 -OutputPath .\ # <---- Using parameter in command
 
 
 
