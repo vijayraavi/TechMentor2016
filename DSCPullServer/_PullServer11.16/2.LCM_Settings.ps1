@@ -5,18 +5,19 @@ Configuration LCM {
         [string[]]$ComputerName
     )
 
-    Node $Computername # <--- Parameterized computer name
+    Node $Computername
 	{
 		Settings # Hit Ctrl-Space for help
 		{
             ConfigurationMode = 'ApplyAndAutoCorrect'
-            RebootNodeIfNeeded = $true		
+            RebootNodeIfNeeded = $true
+            		
 		}
 	}
 }
 
 # Create the Computer.Meta.Mof in folder
-LCM -computername s1, s2 -OutputPath .\ # <---- Using parameter in command
+LCM -computername dc.company.pri -OutputPath .\
 
 
 
