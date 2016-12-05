@@ -13,19 +13,17 @@
        # Unique Data for each Role
        @{
             NodeName = 'PullServer.company.pri'
-            Role = @('Web')#, 'PullServer')
+            Role = @('Web', 'PullServer')
            
- #           PullServerEndPointName = 'PSDSCPullServer'
- #           PullserverPort = 8080                      #< - ask me why I use this port
- #           PullserverPhysicalPath = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer"
- #           PullserverModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
- #           PullServerConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"
- #           PullServerThumbPrint = Invoke-Command -Computername 'Pullserver.company.pri' {Get-Childitem Cert:\LocalMachine\My | Where-Object {$_.FriendlyName -like "*wild*"} | Select-Object -ExpandProperty ThumbPrint}
- #
- #           ComplianceServerEndPointName = 'PSDSCComplianceServer'
- #           ComplianceServerPort = 9080
- #           ComplianceServerPhysicalPath = "$env:SystemDrive\inetpub\wwwroot\PSDSCComplianceServer"
- #           ComplianceServerThumbPrint = 'AllowUnencryptedTraffic'
+            PullServerEndPointName = 'DSCPullServer'
+            PullserverPort = 8080                      #< - ask me why I use this port
+            PullserverPhysicalPath = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer"
+            PullserverModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
+            PullServerConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"
+            PullServerThumbPrint = Invoke-Command -Computername 'Pullserver.company.pri' {Get-Childitem Cert:\LocalMachine\My | Where-Object {$_.FriendlyName -eq "DSCPullServer"} | Select-Object -ExpandProperty ThumbPrint}
+
+            PullServerRegistrationKey = 'd4c3451-2404-4428-a007-2edcce72873b' # Get with New-Guid
+            PullServerRegistrationKeyPath = "$env:ProgramFiles\WindowsPowerShell\DscService\RegistrationKeys.txt"
         }
 
 
@@ -98,12 +96,43 @@ Configuration Pullserver {
 
        }
     }
+
+    ###############################################################################
+
+    Node $AllNodes.where{$_.Role -eq 'PullServer'}.NodeName {
+
+#       # This installs both, WebServer and the DSC Service for a pull server
+#       # You could do everything manually - which I prefer
+
+         WindowsFeature DSCServiceFeature {
+
+            Ensure = "Present"
+            Name   = "DSC-Service"
+        }
+
+       xDscWebService PSDSCPullServer {
+        
+            Ensure = "Present"
+            EndpointName = $Node.PullServerEndPointName
+            Port = $Node.PullServerPort   # <--------------------------------------- Why this port?
+            PhysicalPath = $Node.PullserverPhysicalPath
+            CertificateThumbPrint =  $Node.PullServerThumbprint # <------------------------- Certificate Thumbprint
+            ModulePath = $Node.PullServerModulePath
+            ConfigurationPath = $Node.PullserverConfigurationPath
+            State = "Started"
+            UseSecurityBestPractices = $False
+            DependsOn = "[WindowsFeature]DSCServiceFeature"
+        }
+
+        File RegistrationKeyFile{
+        
+            Ensure          = 'Present'
+            Type            = 'File'
+            DestinationPath = $node.PullServerRegistrationKeyPath
+            Contents        = $Node.PullServerRegistrationKey
+        }
+    }
 }
-
-
-
-
-
 
 
 PullServer -ConfigurationData $ConfigData -OutputPath .\

@@ -1,6 +1,9 @@
 ﻿
 #Pull server
 
+# Documentation
+Start-Process -FilePath iexplore.exe http://msdn.microsoft.com/powershell
+
 # Let's start with some requirements and documentation
 <#
 1. You will need to install a certificate on the Pull servers - I will show you how
@@ -33,7 +36,7 @@ Invoke-Command -Computername 'Pullserver' {Get-Childitem Cert:\LocalMachine\My |
 
 # Step 2 ---- Add DNS
 
-Add-DnsServerResourceRecordA -ComputerName dc -name DSC -ZoneName Company.pri -IPv4Address 192.168.3.70
+Add-DnsServerResourceRecordA -ComputerName dc1 -name DSC -ZoneName Company.pri -IPv4Address 192.168.3.70
 
 
 # Step 3 ---  we need resource modules - on Authoring box and Target
@@ -54,3 +57,9 @@ Start-DscConfiguration -Path .\ -ComputerName PullServer.Company.Pri -Verbose -W
 # TEst the Pull Server
 Start-Process -FilePath iexplore.exe https://dsc.company.pri:8080/PSDSCPullServer.svc
 Start-Process -FilePath inetmgr
+
+# SHOW LCM Documentation on web site
+Start-Process -FilePath iexplore.exe http://msdn.microsoft.com/powershell
+
+## NOW -- About high availability
+#Jason -- go ahead and tell them
