@@ -21,6 +21,15 @@ Invoke-Command -computername $ComputerName {
 # Can Export to PFX if needed on other web servers for high availability - Get-Help *pfx*
 
 #>
+$servers='s1'
+Invoke-command -ComputerName $Servers {New-item -path c:\cert -ItemType Directory -force}
+$servers | ForEach-Object {copy-item -path c:\cert\* -Destination "\\$_\c$\cert" -recurse -force}
+Explorer '\\s1\c$\cert'
+Invoke-Command -ComputerName $servers {certutil -p P@ssw0rd -importpfx "C:\cert\PSDSCPullServerCert.pfx"}
+
+#Get ThumbPrint - should be in Configuration as well
+Invoke-Command -Computername s1 {Get-Childitem Cert:\LocalMachine\My | Where-Object {$_.FriendlyName -eq "PSDSCPullServerCert"} | Select-Object -ExpandProperty ThumbPrint}
+
 
 
 # First -- we need resource modules - on Authoring box and Target
